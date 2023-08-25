@@ -1,0 +1,35 @@
+name: Terraform Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0   # Adjust to the desired version
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Plan Terraform changes
+        run: terraform plan -input=false
+
+      - name: Apply Terraform changes
+        run: terraform apply -auto-approve  
+
+      - name: Capture Outputs
+        id: outputs
+        run: echo "::set-output name=public_ip::$(terraform output -raw public_instance_ip)"
+
+      - name: Display Public IP
+        run: echo "Public IP: ${{ steps.outputs.outputs.public_ip }}"
